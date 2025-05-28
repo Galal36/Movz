@@ -2,13 +2,21 @@ import { useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
+import { isEmailRegistered, registeredUsers } from '../../services/auth';
 
 const RegisterForm = ({ setIsAuthenticated }) => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const validationSchema = Yup.object({
-    email: Yup.string().email('Invalid email address').required('Required'),
+    email: Yup.string()
+      .email('Invalid email address')
+      .required('Required')
+      .test(
+        'email-check',
+        'Email already registered',
+        async (value) => !(await isEmailRegistered(value))
+      ),
     name: Yup.string().required('Required'),
     username: Yup.string()
       .required('Required')
@@ -34,9 +42,30 @@ const RegisterForm = ({ setIsAuthenticated }) => {
       confirmPassword: '',
     },
     validationSchema,
-    onSubmit: (values) => {
-      console.log(values);
-      navigate('/');
+    onSubmit: async (values, { setSubmitting, setFieldError }) => {
+      try {
+        if (await isEmailRegistered(values.email)) {
+          setFieldError('email', 'Email already registered');
+          return;
+        }
+
+        // Add new user to "database"
+        registeredUsers.push({
+          email: values.email,
+          name: values.name,
+          username: values.username,
+          password: values.password
+        });
+
+        localStorage.setItem('isAuthenticated', 'true');
+        setIsAuthenticated(true);
+        navigate('/movies');
+      } catch (error) {
+        console.error('Registration error:', error);
+        setFieldError('email', 'Registration failed. Please try again.');
+      } finally {
+        setSubmitting(false);
+      }
     },
   });
 
@@ -53,6 +82,7 @@ const RegisterForm = ({ setIsAuthenticated }) => {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.email}
+            disabled={formik.isSubmitting}
           />
           {formik.touched.email && formik.errors.email ? (
             <div className="error">{formik.errors.email}</div>
@@ -68,6 +98,7 @@ const RegisterForm = ({ setIsAuthenticated }) => {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.name}
+            disabled={formik.isSubmitting}
           />
           {formik.touched.name && formik.errors.name ? (
             <div className="error">{formik.errors.name}</div>
@@ -83,36 +114,37 @@ const RegisterForm = ({ setIsAuthenticated }) => {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.username}
+            disabled={formik.isSubmitting}
           />
           {formik.touched.username && formik.errors.username ? (
             <div className="error">{formik.errors.username}</div>
           ) : null}
         </div>
 
- 
-
         <div className="password-container">
-  <label htmlFor="password">Password</label>
-  <div className="password-input">
-    <input
-      id="password"
-      name="password"
-      type={showPassword ? 'text' : 'password'}
-      onChange={formik.handleChange}
-      onBlur={formik.handleBlur}
-      value={formik.values.password}
-    />
-    <button
-      type="button"
-      onClick={() => setShowPassword(!showPassword)}
-    >
-      {showPassword ? 'Hide' : 'Show'}
-    </button>
-  </div>
-  {formik.touched.password && formik.errors.password ? (
-    <div className="error">{formik.errors.password}</div>
-  ) : null}
-</div>
+          <label htmlFor="password">Password</label>
+          <div className="password-input">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              value={formik.values.password}
+              disabled={formik.isSubmitting}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              disabled={formik.isSubmitting}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          {formik.touched.password && formik.errors.password ? (
+            <div className="error">{formik.errors.password}</div>
+          ) : null}
+        </div>
 
         <div className="form-group">
           <label htmlFor="confirmPassword">Confirm Password</label>
@@ -123,16 +155,29 @@ const RegisterForm = ({ setIsAuthenticated }) => {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.confirmPassword}
+            disabled={formik.isSubmitting}
           />
           {formik.touched.confirmPassword && formik.errors.confirmPassword ? (
             <div className="error">{formik.errors.confirmPassword}</div>
           ) : null}
         </div>
 
-        <button type="submit" className="submit-btn">Register</button>
+        <button
+          type="submit"
+          className="submit-btn"
+          disabled={formik.isSubmitting}
+        >
+          {formik.isSubmitting ? 'Registering...' : 'Register'}
+        </button>
       </form>
       <p className="auth-switch">
-        Already have an account? <button onClick={() => navigate('/')}>Login</button>
+        Already have an account?{' '}
+        <button
+          onClick={() => navigate('/')}
+          disabled={formik.isSubmitting}
+        >
+          Login
+        </button>
       </p>
     </div>
   );
