@@ -6,6 +6,10 @@ const FavoritesContext = createContext();
 export const FavoritesProvider = ({ children }) => {
   const [favorites, setFavorites] = useState(getFavoriteMovies());
 
+  const refreshFavorites = () => {
+    setFavorites(getFavoriteMovies());
+  };
+
   useEffect(() => {
     const updateFavorites = () => setFavorites(getFavoriteMovies());
 
@@ -14,7 +18,7 @@ export const FavoritesProvider = ({ children }) => {
   }, []);
 
   return (
-    <FavoritesContext.Provider value={{ favorites }}>
+    <FavoritesContext.Provider value={{ favorites, setFavorites, refreshFavorites }}>
       {children}
     </FavoritesContext.Provider>
   );

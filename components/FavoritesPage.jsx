@@ -1,14 +1,13 @@
-
-
 import { useFavorites } from './FavoritesContext';
 import { removeFavorite } from '../services/auth';
 import MovieCard from './Movies/MovieList/MovieCard';
 
 const FavoritesPage = () => {
-  const { favorites } = useFavorites();
+  const { favorites, refreshFavorites } = useFavorites();
 
   const handleRemoveFavorite = (movieId) => {
     removeFavorite(movieId);
+    refreshFavorites(); // Update the state
   };
 
   return (

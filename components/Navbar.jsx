@@ -1,11 +1,12 @@
-
-
+// src/components/Navbar.jsx
 import { Link, useNavigate } from 'react-router-dom';
 import { useFavorites } from './FavoritesContext';
+import { useTranslation } from 'react-i18next';
 
 const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
   const navigate = useNavigate();
   const { favorites } = useFavorites();
+  const { t, i18n } = useTranslation();
 
   const handleLogout = () => {
     setIsAuthenticated(false);
@@ -13,30 +14,35 @@ const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
     navigate('/');
   };
 
-  const viewFavorites = () => {
-    navigate('/favorites');
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
   };
 
   return (
     <nav className="navbar">
-      <Link to="/movies" className="navbar-logo">MovieDB</Link>
+      <Link to="/movies" className="navbar-logo">
+        {t('welcome')}
+      </Link>
 
       <div className="navbar-links">
+        <button onClick={() => changeLanguage('en')}>EN</button>
+        <button onClick={() => changeLanguage('ar')}>AR</button>
+
         {isAuthenticated ? (
           <>
-            <button onClick={viewFavorites} className="favorites-button">
-              ♥ Favorites {favorites.length > 0 && (
+            <button onClick={() => navigate('/favorites')} className="favorites-button">
+              ♥ {t('favorites')} {favorites.length > 0 && (
                 <span className="favorites-count">{favorites.length}</span>
               )}
             </button>
             <button onClick={handleLogout} className="logout-btn">
-              Logout
+              {t('logout')}
             </button>
           </>
         ) : (
           <>
-            <Link to="/" className="navbar-link">Login</Link>
-            <Link to="/register" className="navbar-link">Register</Link>
+            <Link to="/login" className="navbar-link">{t('login')}</Link>
+            <Link to="/register" className="navbar-link">{t('register')}</Link>
           </>
         )}
       </div>
