@@ -1,38 +1,39 @@
-// src/features/movies/moviesSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-
-const API_KEY = '9b743af1d4fde1d65af33c40dcccce87';
+import { API_KEY } from '../../api/config';
 
 export const fetchMovies = createAsyncThunk(
   'movies/fetchMovies',
-  async (language = 'en') => {
-    const response = await axios.get(
-      `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=${language}&page=1`
-    );
+  async ({ language = 'en', search = '', page = 1 } = {}) => {
+    const url = search
+      ? `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${search}&language=${language}&page=${page}`
+      : `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=${language}&page=${page}`;
+    const response = await axios.get(url);
     return response.data.results;
   }
 );
 
+
 const moviesSlice = createSlice({
   name: 'movies',
   initialState: {
-    movies: [],
-    status: 'idle',
+    items: [], // ✅ this MUST exist
+    loading: false,
     error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchMovies.pending, (state) => {
-        state.status = 'loading';
+        state.loading = true;
+        state.error = null;
       })
       .addCase(fetchMovies.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.movies = action.payload;
+        state.loading = false;
+        state.items = action.payload;
       })
       .addCase(fetchMovies.rejected, (state, action) => {
-        state.status = 'failed';
+        state.loading = false;
         state.error = action.error.message;
       });
   },

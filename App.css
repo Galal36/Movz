@@ -49,6 +49,13 @@
   /*display: inline-block; !* 2. Allows margin to work properly *!*/
 }
 
+.active-lang {
+  font-weight: bold;
+  background-color: #ddd;
+  border-radius: 5px;
+}
+
+
 .navbar-link:hover {
   color: #3498db;
 }
@@ -241,10 +248,21 @@
   padding: 10px 0;
 }
 
+/*.movie-rating {*/
+/*  color: #f39c12;*/
+/*  font-weight: bold;*/
+/*}*/
 .movie-rating {
-  color: #f39c12;
+  color: #f1c40f; /* gold */
   font-weight: bold;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
 }
+
+
 
 /* Movie Detail */
 .movie-detail {

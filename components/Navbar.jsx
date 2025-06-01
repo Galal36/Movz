@@ -1,12 +1,9 @@
-// src/components/Navbar.jsx
 import { Link, useNavigate } from 'react-router-dom';
 import { useFavorites } from './FavoritesContext';
-import { useTranslation } from 'react-i18next';
 
-const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
+const Navbar = ({ isAuthenticated, setIsAuthenticated, language, setLanguage }) => {
   const navigate = useNavigate();
   const { favorites } = useFavorites();
-  const { t, i18n } = useTranslation();
 
   const handleLogout = () => {
     setIsAuthenticated(false);
@@ -14,35 +11,41 @@ const Navbar = ({ isAuthenticated, setIsAuthenticated }) => {
     navigate('/');
   };
 
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
-  };
-
   return (
     <nav className="navbar">
       <Link to="/movies" className="navbar-logo">
-        {t('welcome')}
+        Movzz
       </Link>
 
       <div className="navbar-links">
-        <button onClick={() => changeLanguage('en')}>EN</button>
-        <button onClick={() => changeLanguage('ar')}>AR</button>
+        <button
+          onClick={() => setLanguage('en')}
+          className={language === 'en' ? 'active-lang' : ''}
+        >
+          EN
+        </button>
+        <button
+          onClick={() => setLanguage('ar')}
+          className={language === 'ar' ? 'active-lang' : ''}
+        >
+          AR
+        </button>
 
         {isAuthenticated ? (
           <>
             <button onClick={() => navigate('/favorites')} className="favorites-button">
-              ♥ {t('favorites')} {favorites.length > 0 && (
+              ♥ Favorites {favorites.length > 0 && (
                 <span className="favorites-count">{favorites.length}</span>
               )}
             </button>
             <button onClick={handleLogout} className="logout-btn">
-              {t('logout')}
+              Logout
             </button>
           </>
         ) : (
           <>
-            <Link to="/login" className="navbar-link">{t('login')}</Link>
-            <Link to="/register" className="navbar-link">{t('register')}</Link>
+            <Link to="/login" className="navbar-link">Login</Link>
+            <Link to="/register" className="navbar-link">Register</Link>
           </>
         )}
       </div>
